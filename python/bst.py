@@ -145,6 +145,94 @@ class BST(object):
       root = parent
     return root
 
+  def balance(self):
+    """Balance the BST to reduce the tree's depth.
+
+    Preserves the BST ordering by performing tree rotations.
+
+    Returns:
+      None
+    """
+    self.root = BST.balance_node(self.root)
+
+  @staticmethod
+  def balance_node(node):
+    """Balance this node and return the new root."""
+    if node is None:
+      return None
+    balancing = True
+    while balancing:
+      balancing = False
+      node.left = BST.balance_node(node.left)
+      node.right = BST.balance_node(node.right)
+      left_depth = BST.node_depth(node.left)
+      right_depth = BST.node_depth(node.right)
+      if left_depth >= right_depth+2:
+        outside_depth = BST.node_depth(node.left.left)
+        inside_depth = BST.node_depth(node.left.right)
+        if inside_depth > outside_depth:
+          # If the inner branch is deeper, then
+          # rotating will not help balance the depth.
+          pass
+        else:
+          node = BST.rotate_right(node)
+          balancing = True
+      elif right_depth >= left_depth+2:
+        outside_depth = BST.node_depth(node.right.right)
+        inside_depth = BST.node_depth(node.right.left)
+        if inside_depth > outside_depth:
+          # If the inner branch is deeper, then
+          # rotating will not help balance the depth.
+          pass
+        else:
+          node = BST.rotate_left(node)
+          balancing = True
+    return node
+
+  @staticmethod
+  def rotate_left(node):
+    if node is None:
+      return None
+    if node.right is None:
+      # Cannot rotate left if right branch does not exist.
+      return node
+    new_root = node.right
+    orphan = new_root.left
+    new_root.left = node
+    node.right = orphan
+    return new_root
+
+  @staticmethod
+  def rotate_right(node):
+    if node is None:
+      return None
+    if node.left is None:
+      # Cannot rotate right if left branch does not exist.
+      return node
+    new_root = node.left
+    orphan = new_root.right
+    new_root.right= node
+    node.left= orphan
+    return new_root
+
+  def depth(self):
+    """Return the depth of the BST.
+
+    Returns:
+      Empty tree returns 0.
+      Tree with a single node returns 1.
+      Returns 1 + the max depth of the left and right branches.
+    """
+    return BST.node_depth(self.root)
+
+  @staticmethod
+  def node_depth(node):
+    if node is None:
+      return 0
+    left = BST.node_depth(node.left)
+    right = BST.node_depth(node.right)
+    return 1 + max(left, right)
+
   def is_valid(self):
     """Validate the binary search tree.
 
@@ -297,6 +385,35 @@ class TestBST(unittest.TestCase):
     result = bst.find(13)
     self.assertIsNone(result)
     self.assertTrue(bst.is_valid())
+
+  def test_depth(self):
+    bst = BST()
+    bst.insert(15)
+    bst.insert(16)
+    bst.insert(17)
+    self.assertEqual(bst.depth(), 3)
+
+  def test_balance(self):
+    bst = BST()
+    bst.insert(18)
+    bst.insert(19)
+    bst.insert(20)
+    bst.insert(21)
+    bst.insert(22)
+    bst.insert(23)
+    self.assertEqual(bst.depth(), 6)
+    bst.balance()
+    self.assertEqual(bst.depth(), 4)
+
+  def test_stable(self):
+    """Do not balance a tree that cannot be balanced."""
+    bst = BST()
+    bst.insert(18)
+    bst.insert(20)
+    bst.insert(19)
+    self.assertEqual(bst.depth(), 3)
+    bst.balance()
+    self.assertEqual(bst.depth(), 3)
 
 
 if __name__ == '__main__':
