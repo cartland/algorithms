@@ -14,18 +14,21 @@
 
 import unittest
 
-class MinHeap(object):
-  """Min heap.
+class Heap(object):
+  """Min/max heap implementation.
 
-  Items are inserted with MinHeap.insert().
-  The smallest item can be viewed with MinHeap.peek().
-  The smallest item can be removed with MinHeap.pop().
+  Min heap by default. Use Heap(max_heap=True) to create a max heap.
+
+  Items are inserted with Heap.insert().
+  The top item can be viewed with Heap.peek().
+  The top item can be removed with Heap.pop().
   """
 
-  def __init__(self):
+  def __init__(self, max_heap=False):
     self.items = [None] # Index 0 is unused for easier math.
     self.item_count = 0
     self.invalid_index_set = set()
+    self.is_max_heap = max_heap
 
   def __str__(self):
     return 'Count: %d, Items: %s, Invalid Index Set: %s' % (self.count(),
@@ -33,6 +36,14 @@ class MinHeap(object):
 
   def count(self):
     return self.item_count
+
+  def is_heap_order(self, parent, child):
+    if self.is_max_heap:
+      # Max heap.
+      return parent >= child
+    else:
+      # Min heap.
+      return parent <= child
 
   def insert(self, item):
     """Insert an item into the min heap.
@@ -50,7 +61,7 @@ class MinHeap(object):
     self.items[index] = item
     while index > 1:
       parent_index = index / 2 # Truncate, e.g. 4 and 5 have parent 2.
-      if self.items[parent_index] <= self.items[index]:
+      if self.is_heap_order(self.items[parent_index], self.items[index]):
         # The item does not need to bubble up anymore. Done.
         return
       else:
@@ -74,10 +85,10 @@ class MinHeap(object):
     return index
 
   def peek(self):
-    """Peek at the smallest item in the heap.
+    """Peek at the top item in the heap.
 
     Returns:
-      The smallest item.
+      The top item.
 
     Runtime:
       Constant time O(1).
@@ -87,10 +98,10 @@ class MinHeap(object):
     return self.items[1]
 
   def pop(self):
-    """Remove and return the smallest item.
+    """Remove and return the top item.
 
     Returns:
-      The smallest item.
+      The top item.
 
     Runtime:
       O(log(N)) time where N is the number of items in the heap.
@@ -114,12 +125,12 @@ class MinHeap(object):
         # Left child does not exist, so bubble up from right.
         self.items[index] = self.items[right]
         index = right
-      elif self.items[left] < self.items[right]:
-        # Left child is smaller, so bubble up from left.
+      elif self.is_heap_order(self.items[left], self.items[right]):
+        # Left child should be on top, so bubble up from left.
         self.items[index] = self.items[left]
         index = left
       else:
-        # Right child is larger or equal, so bubble up from right.
+        # Right child should be on top, so bubble up from right.
         self.items[index] = self.items[right]
         index = right
 
@@ -134,28 +145,28 @@ class MinHeap(object):
     self.invalid_index_set.add(index)
 
 
-class TestMinHeap(unittest.TestCase):
+class TestHeap(unittest.TestCase):
   """Test cases for the min-heap."""
 
   def test_empty(self):
-    heap = MinHeap()
+    heap = Heap()
     self.assertIsNotNone(heap)
 
   def test_insert_one(self):
-    heap = MinHeap()
+    heap = Heap()
     heap.insert(1)
     result = heap.peek()
     self.assertEqual(result, 1)
 
   def test_insert_two(self):
-    heap = MinHeap()
+    heap = Heap()
     heap.insert(2)
     heap.insert(1)
     result = heap.peek()
     self.assertEqual(result, 1)
 
   def test_pop(self):
-    heap = MinHeap()
+    heap = Heap()
     heap.insert(5)
     heap.insert(1)
     heap.insert(2)
@@ -173,7 +184,7 @@ class TestMinHeap(unittest.TestCase):
     self.assertEqual(result, 5)
 
   def test_pop_and_insert(self):
-    heap = MinHeap()
+    heap = Heap()
     heap.insert(7)
     heap.insert(6)
     result = heap.pop()
@@ -181,6 +192,16 @@ class TestMinHeap(unittest.TestCase):
     heap.insert(8)
     result = heap.pop()
     self.assertEqual(result, 7)
+
+  def test_max_heap(self):
+    heap = Heap(max_heap=True)
+    heap.insert(7)
+    heap.insert(6)
+    result = heap.pop()
+    self.assertEqual(result, 7)
+    heap.insert(8)
+    result = heap.pop()
+    self.assertEqual(result, 8)
 
 
 if __name__ == '__main__':
