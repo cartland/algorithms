@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from bt import BinaryTreeNode
 import unittest
 
 class BST(object):
@@ -269,49 +270,6 @@ class BST(object):
     if not BST.is_valid_node(node.right, node.datum, mx):
       return False
     return True
-
-
-class BinaryTreeNode(object):
-  """A binary tree node contains a datum nd two children.
-
-  Attributes:
-    datum: A value that can be compared to other values in the tree.
-    left: The BinaryTreeNode for the left branch.
-    right: the BinaryTreeNode for the right branch.
-  """
-
-  def __init__(self, datum):
-    self.datum = datum
-    self.left = None
-    self.right = None
-
-  def __str__(self):
-    return self.pretty_str()
-
-  def pretty_str(self, indent=0):
-    """Human readable view of the tree.
-
-    Args:
-      self: BinaryTreeNode.
-      indent: The number of spaces that this node needs to be indented.
-
-    Returns:
-      A string that can be printed to the command line."""
-    output = ''
-    if self.right is not None:
-      output += self.right.pretty_str(indent+2)
-      output += '\n'
-      output += ' ' * indent
-      output += ' /'
-      output += '\n'
-    output += ' ' * indent
-    output += str(self.datum)
-    if self.left is not None:
-      output += '\n'
-      output += ' ' * indent
-      output += ' \\\n'
-      output += self.left.pretty_str(indent+2)
-    return output
 
 
 class TestBST(unittest.TestCase):
